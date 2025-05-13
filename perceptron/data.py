@@ -2,29 +2,40 @@ from collections import namedtuple
 import numpy as np
 
 seed = 1
-rng = np.random.default_rng()
-
-threshold = 0.7
-source_parameters = [-1.0, 1.0, 1.0, 1.0]
+rng = np.random.default_rng(seed=seed)
 
 Credit = namedtuple(
     "Credit", ["threshold", "wealth_score", "profile_score", "debt_score", "result"]
 )
 
+source_parameters = [-0.7, 1.0, 1.0, 1.0]
+
+
+def f(data_point: Credit) -> bool:
+    return sum(
+        [
+            source_parameters[0] * data_point.threshold,
+            source_parameters[1] * data_point.wealth_score,
+            source_parameters[2] * data_point.profile_score,
+            source_parameters[3] * data_point.debt_score,
+        ]
+    )
+
+
 scale = 1
 dimensionality = 4
 
-sample_size = 100
+sample_size = 10000
 
 
 # wealth_score = rng.normal(0.5 * scale, std, sample_size)
 # profile_score = rng.normal(0.5 * scale, std, sample_size)
 
 avg = 0.3
-std = 0.05
+std = 0.1
 
 
-thresholds = [threshold] * sample_size
+thresholds = [1.0] * sample_size
 wealth_score = rng.normal(loc=avg, scale=std, size=sample_size)
 profile_score = rng.normal(loc=avg, scale=std, size=sample_size)
 debt_score = rng.normal(loc=avg, scale=std, size=sample_size)
@@ -46,6 +57,3 @@ data = list(
         zip(thresholds, wealth_score, profile_score, debt_score),
     )
 )
-
-for row in data:
-    print(row)
