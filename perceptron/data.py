@@ -12,6 +12,10 @@ def dot_product(x: Sequence[float], y: Sequence[float]):
     return sum([a * b for a, b in zip(x, y)])
 
 
+def cosine(x: Sequence[float], y: Sequence[float]):
+    return dot_product(x, y) / (np.sqrt(dot_product(x, x)) * np.sqrt(dot_product(y, y)))
+
+
 def f(data_point: Sequence[float]) -> bool:
     assert len(data_point) == len(source_parameters)
     return dot_product(x=data_point, y=source_parameters)
