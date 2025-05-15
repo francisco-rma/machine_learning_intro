@@ -41,6 +41,8 @@ def linear_regression(data: list[tuple[Credit, float]], target_params: list[floa
 
 def train(data: list[tuple[Credit, float]], iterations: int = 1000) -> list[float]:
     convergence = [cosine(target_parameters, source_parameters)]
+    err_num = [measure_numeric_error(data=data)]
+    err_class = [measure_classification_error(data=data)]
     done = False
 
     i = 0
@@ -49,13 +51,15 @@ def train(data: list[tuple[Credit, float]], iterations: int = 1000) -> list[floa
         i += 1
         done = linear_regression(data=data, target_params=target_parameters)
         convergence.append(cosine(target_parameters, source_parameters))
+        err_num.append(measure_numeric_error(data=data))
+        err_class.append(measure_classification_error(data=data))
 
     print(f"Processed LINEAR REGRESSION for {i} iterations!")
     print(target_parameters)
     print(source_parameters)
     print("\n")
 
-    return convergence
+    return convergence, err_num, err_class
 
 
 def measure_numeric_error(data: list[tuple[Credit, float]], err_func=lambda x, y: (x - y) ** 2):

@@ -37,8 +37,12 @@ def perceptron(data: list[tuple[Credit, bool]], target_params: list[float]):
             return True
 
 
-def train(data: list[tuple[Credit, bool]], iterations: int = 1000) -> list[float]:
+def train(
+    data: list[tuple[Credit, bool]], iterations: int = 1000
+) -> tuple[list[float], list[float], list[float]]:
     convergence = [cosine(target_parameters, source_parameters)]
+    err_num = [measure_numeric_error(data=data)]
+    err_class = [measure_classification_error(data=data)]
     done = False
 
     i = 0
@@ -47,13 +51,15 @@ def train(data: list[tuple[Credit, bool]], iterations: int = 1000) -> list[float
         i += 1
         done = perceptron(data=data, target_params=target_parameters)
         convergence.append(cosine(target_parameters, source_parameters))
+        err_num.append(measure_numeric_error(data=data))
+        err_class.append(measure_classification_error(data=data))
 
     print(f"Processed PERCEPTRON for {i} iterations!")
     print(target_parameters)
     print(source_parameters)
     print("\n")
 
-    return convergence
+    return convergence, err_num, err_class
 
 
 def measure_numeric_error(data: list[tuple[Credit, float]], err_func=lambda x, y: (x - y) ** 2):
