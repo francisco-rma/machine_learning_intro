@@ -2,4 +2,5 @@
 *.csv
 *.txt
 *.png
+.obsidian/
 __pycache__/*
