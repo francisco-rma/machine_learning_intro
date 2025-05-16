@@ -2,8 +2,12 @@ from collections import namedtuple
 from typing import Sequence
 import numpy as np
 
+DEFAULT_SIZE = 1000
+
 Credit = namedtuple("Credit", ["threshold", "wealth_score", "profile_score", "debt_score"])
 
+dimensionality = len(Credit._fields)
+seed = 1
 
 source_parameters = [-1.0, 1.0, 1.0, 1.0]
 
@@ -24,7 +28,7 @@ def f(data_point: Sequence[float]) -> float:
 def generate_binary_data(
     rng: np.random.Generator,
     dimensionality: int = 4,
-    sample_size: int = 1000,
+    sample_size: int = DEFAULT_SIZE,
 ) -> list[tuple[Credit, bool]]:
     avg = 0.3
     std = 0.1
@@ -50,14 +54,14 @@ def generate_data(
     rng: np.random.Generator,
     dimensionality: int = 4,
     sample_size: int = 1000,
-) -> list[tuple[Credit, float]]:
+) -> tuple[list[Credit], list[float]]:
     avg = 0.3
     std = 0.1
 
     thresholds = [1.0] * sample_size
     data = list(
         map(
-            lambda x: (Credit(*x), f(x)),
+            lambda x: Credit(*x),
             zip(
                 thresholds,
                 *[
@@ -68,4 +72,4 @@ def generate_data(
         )
     )
 
-    return data
+    return data, list(map(f, data))

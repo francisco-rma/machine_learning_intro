@@ -1,16 +1,24 @@
 import numpy as np
 from typing import Sequence
-from data import Credit, cosine, dot_product, f, source_parameters, generate_binary_data
+from data import (
+    Credit,
+    cosine,
+    dot_product,
+    f,
+    source_parameters,
+    generate_binary_data,
+    DEFAULT_SIZE,
+    dimensionality,
+    seed,
+)
 
-seed = 1
-dimensionality = len(Credit._fields)
-sample_size = 10000
+
 rng: np.random.Generator = np.random.default_rng(seed=seed)
 
 target_parameters = [rng.random() for _ in range(dimensionality)]
 source_vector_size = np.sqrt(dot_product(source_parameters, source_parameters))
 
-sample_data = generate_binary_data(rng=rng, dimensionality=dimensionality, sample_size=sample_size)
+sample_data = generate_binary_data(rng=rng, dimensionality=dimensionality, sample_size=DEFAULT_SIZE)
 
 
 def g(data_point: Sequence[float]) -> bool:
@@ -41,18 +49,21 @@ def train(
     data: list[tuple[Credit, bool]], iterations: int = 1000
 ) -> tuple[list[float], list[float], list[float]]:
     convergence = [cosine(target_parameters, source_parameters)]
-    err_num = [measure_numeric_error(data=data)]
-    err_class = [measure_classification_error(data=data)]
-    done = False
+    err_num = [np.mean(measure_numeric_error(data=data))]
+    err_class = [
+        len(list(filter(lambda x: x is True, measure_classification_error(data=data)))) / len(data)
+    ]
 
     i = 0
 
-    while i < iterations and not done:
+    while i < iterations:
         i += 1
-        done = perceptron(data=data, target_params=target_parameters)
+        perceptron(data=data, target_params=target_parameters)
         convergence.append(cosine(target_parameters, source_parameters))
-        err_num.append(measure_numeric_error(data=data))
-        err_class.append(measure_classification_error(data=data))
+        err_num.append(np.mean(measure_numeric_error(data=data)))
+        errors = measure_classification_error(data=data)
+        err_freq = len(list(filter(lambda x: x, errors))) / len(data)
+        err_class.append(err_freq)
 
     print(f"Processed PERCEPTRON for {i} iterations!")
     print(target_parameters)
@@ -62,17 +73,25 @@ def train(
     return convergence, err_num, err_class
 
 
-def measure_numeric_error(data: list[tuple[Credit, float]], err_func=lambda x, y: (x - y) ** 2):
-    err_list = []
-    for data_point, result in data:
-        err_list.append(err_func(g(data_point=data_point), result))
+def measure_numeric_error(
+    data: list[tuple[Credit, float]], err_func=lambda x, y: (x - y) ** 2
+) -> list[float]:
+    err_list = [err_func(g(data_point=data_point), result) for data_point, result in data]
+    return err_list
 
-    return np.mean(err_list)
+
+def measure_classification_error(
+    data: list[tuple[Credit, bool]], err_func=lambda x, y: x != y
+) -> list[bool]:
+    err_list = [err_func(g(data_point=data_point) >= 0.0, result) for data_point, result in data]
+    return err_list
 
 
-def measure_classification_error(data: list[tuple[Credit, float]], err_func=lambda x, y: x != y):
-    err_list = []
-    for data_point, result in data:
-        err_list.append(err_func(g(data_point=data_point) >= 0.0, result >= 0.0))
+def classify(data: list[Credit]) -> list[bool]:
+    result = [g(data_point=data_point) >= 0.0 for data_point in list(zip(*data))[0]]
+    return result
 
-    return np.mean(err_list)
+
+def calculate(data: list[Credit]) -> list[float]:
+    result = [g(data_point=data_point) for data_point in list(zip(*data))[0]]
+    return result
