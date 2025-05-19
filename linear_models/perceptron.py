@@ -12,7 +12,6 @@ from data import (
     seed,
 )
 
-
 rng: np.random.Generator = np.random.default_rng(seed=seed)
 
 target_parameters = [rng.random() for _ in range(dimensionality)]
@@ -21,7 +20,7 @@ source_vector_size = np.sqrt(dot_product(source_parameters, source_parameters))
 sample_data = generate_binary_data(rng=rng, dimensionality=dimensionality, sample_size=DEFAULT_SIZE)
 
 
-def g(data_point: Sequence[float]) -> bool:
+def g(data_point: Sequence[float]) -> float:
     assert len(data_point) == len(target_parameters)
     return dot_product(x=data_point, y=target_parameters)
 
@@ -49,20 +48,21 @@ def train(
     data: list[tuple[Credit, bool]], iterations: int = 1000
 ) -> tuple[list[float], list[float], list[float]]:
     convergence = [cosine(target_parameters, source_parameters)]
-    err_num = [np.mean(measure_numeric_error(data=data))]
+    err_num_avg = [np.mean(measure_numeric_error(data=data))]
     err_class = [
         len(list(filter(lambda x: x is True, measure_classification_error(data=data)))) / len(data)
     ]
-
     i = 0
 
     while i < iterations:
         i += 1
         perceptron(data=data, target_params=target_parameters)
         convergence.append(cosine(target_parameters, source_parameters))
-        err_num.append(np.mean(measure_numeric_error(data=data)))
-        errors = measure_classification_error(data=data)
-        err_freq = len(list(filter(lambda x: x, errors))) / len(data)
+        errors = measure_numeric_error(data=data)
+        err_num_avg.append(np.mean(errors))
+        err_freq = len(list(filter(lambda x: x, measure_classification_error(data=data)))) / len(
+            data
+        )
         err_class.append(err_freq)
 
     print(f"Processed PERCEPTRON for {i} iterations!")
@@ -70,7 +70,7 @@ def train(
     print(source_parameters)
     print("\n")
 
-    return convergence, err_num, err_class
+    return convergence, err_num_avg, err_class
 
 
 def measure_numeric_error(

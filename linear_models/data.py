@@ -4,12 +4,19 @@ import numpy as np
 
 DEFAULT_SIZE = 1000
 
-Credit = namedtuple("Credit", ["threshold", "wealth_score", "profile_score", "debt_score"])
+Credit = namedtuple("Credit", ["threshold", "wealth_score", "profile_score"])
 
 dimensionality = len(Credit._fields)
 seed = 1
 
-source_parameters = [-1.0, 1.0, 1.0, 1.0]
+source_parameters = [-0.7, 1.0, 1.0]
+
+
+def normalize(target_vector: list[float]):
+    norm_factor = 1 / np.sqrt(dot_product(target_vector, target_vector))
+
+    for x in target_vector:
+        x *= norm_factor
 
 
 def dot_product(x: Sequence[float], y: Sequence[float]) -> float:
@@ -27,7 +34,7 @@ def f(data_point: Sequence[float]) -> float:
 
 def generate_binary_data(
     rng: np.random.Generator,
-    dimensionality: int = 4,
+    dimensionality: int,
     sample_size: int = DEFAULT_SIZE,
 ) -> list[tuple[Credit, bool]]:
     avg = 0.3
@@ -52,10 +59,10 @@ def generate_binary_data(
 
 def generate_data(
     rng: np.random.Generator,
-    dimensionality: int = 4,
-    sample_size: int = 1000,
+    dimensionality: int,
+    sample_size: int,
 ) -> tuple[list[Credit], list[float]]:
-    avg = 0.3
+    avg = 0.4
     std = 0.1
 
     thresholds = [1.0] * sample_size
