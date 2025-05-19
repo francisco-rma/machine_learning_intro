@@ -1,6 +1,6 @@
 from typing import Callable, Sequence
 import matplotlib.pyplot as plt
-from data import Credit
+from linear_models.data import Credit
 import numpy as np
 
 

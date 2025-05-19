@@ -1,6 +1,6 @@
 import numpy as np
 from typing import Sequence
-from data import (
+from linear_models.data import (
     Credit,
     cosine,
     dot_product,

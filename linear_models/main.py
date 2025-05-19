@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from data import DEFAULT_SIZE, f, generate_data, dimensionality, source_parameters
-import perceptron
-import linear_regression
-import plots
+from linear_models.data import DEFAULT_SIZE, f, generate_data, dimensionality, source_parameters
+import linear_models.perceptron as perceptron
+import linear_models.linear_regression as linear_regression
+import linear_models.plots as plots
 
 
 def normalize(a: list, b: list):

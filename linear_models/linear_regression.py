@@ -1,6 +1,7 @@
 import numpy as np
+from utils import benchmark
 from typing import Sequence
-from data import (
+from linear_models.data import (
     Credit,
     cosine,
     dot_product,
@@ -27,6 +28,7 @@ def g(data_point: Sequence[float]) -> float:
     return dot_product(x=data_point, y=target_parameters)
 
 
+@benchmark
 def linear_regression(data: list[tuple[Credit, float]], target_params: list[float]) -> bool:
     for idx, (data_point, result) in enumerate(data):
         test_value = g(data_point=data_point)
@@ -48,6 +50,7 @@ def linear_regression(data: list[tuple[Credit, float]], target_params: list[floa
             return True
 
 
+@benchmark
 def train(
     data: list[tuple[Credit, float]], iterations: int = 1000
 ) -> tuple[list[float], list[float], list[float]]:
@@ -77,6 +80,7 @@ def train(
     return convergence, err_num, err_class
 
 
+@benchmark
 def measure_numeric_error(
     data: list[tuple[Credit, float]], err_func=lambda x, y: (x - y) ** 2
 ) -> list[float]:
@@ -84,6 +88,7 @@ def measure_numeric_error(
     return err_list
 
 
+@benchmark
 def measure_classification_error(
     data: list[tuple[Credit, bool]], err_func=lambda x, y: x != y
 ) -> list[bool]:
@@ -91,11 +96,13 @@ def measure_classification_error(
     return err_list
 
 
+@benchmark
 def classify(data: list[Credit]) -> list[bool]:
     result = [g(data_point=data_point) >= 0.0 for data_point in list(zip(*data))[0]]
     return result
 
 
+@benchmark
 def calculate(data: list[Credit]) -> list[float]:
     result = [g(data_point=data_point) for data_point in list(zip(*data))[0]]
     return result
