@@ -3,4 +3,5 @@
 *.txt
 *.png
 .obsidian/*
+.vscode/*
 __pycache__/*
