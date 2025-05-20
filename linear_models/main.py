@@ -13,19 +13,18 @@ def normalize(a: list, b: list):
         b.extend([None] * abs(len(a) - len(b)))
 
 
-iter_n = 1000
+iter_n = 100
 size = DEFAULT_SIZE * 10
-
-
-perceptron_cosine_convergence, perceptron_num_err_convergence, perceptron_class_err_convergence = (
-    perceptron.train(data=perceptron.sample_data, iterations=iter_n)
-)
 
 (
     linear_regression_cosine_convergence,
     linear_regression_num_err_convergence,
     linear_regression_class_err_convergence,
-) = linear_regression.train(data=linear_regression.sample_data, iterations=iter_n)
+) = linear_regression.train(rows=linear_regression.sample_data, iterations=iter_n)
+
+perceptron_cosine_convergence, perceptron_num_err_convergence, perceptron_class_err_convergence = (
+    perceptron.train(rows=perceptron.sample_data, iterations=iter_n)
+)
 
 x_axis = range(len(perceptron_class_err_convergence))
 assert len(x_axis) == len(perceptron_class_err_convergence)
@@ -84,21 +83,24 @@ plt.close()
 out_of_sample_data, out_of_sample_result = generate_data(
     rng=np.random.default_rng(seed=3), sample_size=size, dimensionality=dimensionality
 )
+out_of_sample_data = np.array(out_of_sample_data)
+out_of_sample_result = np.array(out_of_sample_result)
+out_of_sample_bool_result = np.array(list(map(lambda x: x >= 0.0, out_of_sample_result)))
 
-out_of_sample_class_result = list(map(lambda x: x >= 0.0, out_of_sample_result))
 
 perceptron_class_error = perceptron.measure_classification_error(
-    list(zip(out_of_sample_data, out_of_sample_class_result))
+    data=out_of_sample_data, control=out_of_sample_bool_result
 )
 perceptron_num_err_convergence = perceptron.measure_numeric_error(
-    list(zip(out_of_sample_data, out_of_sample_result))
+    out_of_sample_data, control=out_of_sample_result
 )
 
 linear_regression_class_error = linear_regression.measure_classification_error(
-    list(zip(out_of_sample_data, out_of_sample_class_result))
+    data=out_of_sample_data, control=out_of_sample_bool_result
 )
+
 linear_regression_num_err_convergence = linear_regression.measure_numeric_error(
-    list(zip(out_of_sample_data, out_of_sample_result))
+    out_of_sample_data, control=out_of_sample_result
 )
 
 print(f"perceptron classification error: {np.mean(perceptron_class_err_convergence)}")

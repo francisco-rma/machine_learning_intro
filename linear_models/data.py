@@ -1,7 +1,7 @@
 from collections import namedtuple
-from typing import Sequence
 import numpy as np
 
+TOLERANCE = 10**-4
 DEFAULT_SIZE = 1000
 
 Credit = namedtuple("Credit", ["threshold", "wealth_score", "profile_score"])
@@ -9,27 +9,21 @@ Credit = namedtuple("Credit", ["threshold", "wealth_score", "profile_score"])
 dimensionality = len(Credit._fields)
 seed = 1
 
-source_parameters = [-0.7, 1.0, 1.0]
+source_parameters = np.array([-0.7, 1.0, 1.0])
 
 
-def normalize(target_vector: list[float]):
-    norm_factor = 1 / np.sqrt(dot_product(target_vector, target_vector))
-
-    for x in target_vector:
-        x *= norm_factor
+def normalize(target_vector: np.ndarray):
+    norm_factor = 1 / np.dot(target_vector, target_vector)
+    target_vector *= norm_factor
 
 
-def dot_product(x: Sequence[float], y: Sequence[float]) -> float:
-    return sum([a * b for a, b in zip(x, y)])
+def cosine(x: np.ndarray, y: np.ndarray):
+    return np.dot(x, y) / (np.sqrt(np.dot(x, x)) * np.sqrt(np.dot(y, y)))
 
 
-def cosine(x: Sequence[float], y: Sequence[float]):
-    return dot_product(x, y) / (np.sqrt(dot_product(x, x)) * np.sqrt(dot_product(y, y)))
-
-
-def f(data_point: Sequence[float]) -> float:
+def f(data_point: np.ndarray) -> float:
     assert len(data_point) == len(source_parameters)
-    return dot_product(x=data_point, y=source_parameters)
+    return np.dot(a=data_point, b=source_parameters)
 
 
 def generate_binary_data(
@@ -37,13 +31,13 @@ def generate_binary_data(
     dimensionality: int,
     sample_size: int = DEFAULT_SIZE,
 ) -> list[tuple[Credit, bool]]:
-    avg = 0.3
+    avg = 0.4
     std = 0.1
 
     thresholds = [1.0] * sample_size
     data = list(
         map(
-            lambda x: (Credit(*x), f(x) >= 0),
+            lambda x: Credit(*x),
             zip(
                 thresholds,
                 *[
@@ -54,7 +48,7 @@ def generate_binary_data(
         )
     )
 
-    return data
+    return data, list(map(lambda x: f(x) >= 0.0, data))
 
 
 def generate_data(

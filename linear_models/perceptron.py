@@ -1,89 +1,122 @@
 import numpy as np
-from typing import Sequence
+from utils import benchmark
 from linear_models.data import (
     Credit,
     cosine,
-    dot_product,
-    f,
-    source_parameters,
     generate_binary_data,
+    source_parameters,
     DEFAULT_SIZE,
     dimensionality,
     seed,
 )
 
+
 rng: np.random.Generator = np.random.default_rng(seed=seed)
 
-target_parameters = [rng.random() for _ in range(dimensionality)]
-source_vector_size = np.sqrt(dot_product(source_parameters, source_parameters))
+target_parameters = np.array([rng.random() for _ in range(dimensionality)])
+source_vector_size = np.sqrt(np.dot(source_parameters, source_parameters))
 
-sample_data = generate_binary_data(rng=rng, dimensionality=dimensionality, sample_size=DEFAULT_SIZE)
+creds, result = generate_binary_data(
+    rng=rng, dimensionality=dimensionality, sample_size=DEFAULT_SIZE
+)
+sample_data = list(zip(creds, result))
 
 
-def g(data_point: Sequence[float]) -> float:
+def g(data_point: np.ndarray) -> float:
     assert len(data_point) == len(target_parameters)
-    return dot_product(x=data_point, y=target_parameters)
+    return np.dot(a=data_point, b=target_parameters)
 
 
-def perceptron(data: list[tuple[Credit, bool]], target_params: list[float]):
-    for idx, (data_point, result) in enumerate(data):
-        test = g(data_point=data_point)
-        control = f(data_point=data_point)
-        assert result == (control >= 0.0)
+def perceptron(data: np.ndarray, result: np.ndarray, target_params: np.ndarray) -> bool:
+    assert data.shape[1] == target_params.shape[0]
+    test: np.ndarray = np.matmul(data, target_params)
+    boolean_test = np.array(list(map(lambda x: x >= 0.0, test)))
+    assert test.shape == result.shape
 
-        test_result = test >= 0.0
+    diff: np.ndarray = result == boolean_test
 
-        if test_result != result:
-            y = 1 if test < control else -1
+    assert diff.shape == test.shape
+    assert diff.shape == result.shape
 
-            for idx, value in enumerate(data_point._asdict().values()):
-                target_params[idx] += y * value
-            return False
+    if diff.any():
+        idx = diff.argmin()
+        y = 1 if test[idx] < 0.0 else -1
+        values = data[idx]
+        target_params += values * y
 
-        if idx == len(data) - 1:
-            return True
 
-
+@benchmark
 def train(
-    data: list[tuple[Credit, bool]], iterations: int = 1000
+    rows: list[tuple[Credit, float]], iterations: int = 1000
 ) -> tuple[list[float], list[float], list[float]]:
+    data = np.ndarray((len(rows), dimensionality))
+    result = np.ndarray((len(rows)))
+    boolean_result = np.ndarray((len(rows), 1))
+
+    for idx, (row, control_value) in enumerate(rows):
+        data[idx, :] = row
+        result[idx] = control_value
+        boolean_result[idx] = control_value >= 0.0
+
     convergence = [cosine(target_parameters, source_parameters)]
-    err_num_avg = [np.mean(measure_numeric_error(data=data))]
+    err_num = [np.mean(measure_numeric_error(data=data, control=result))]
     err_class = [
-        len(list(filter(lambda x: x is True, measure_classification_error(data=data)))) / len(data)
+        len(
+            list(
+                filter(
+                    lambda x: x is True,
+                    measure_classification_error(data=data, control=boolean_result),
+                )
+            )
+        )
+        / len(data)
     ]
+
     i = 0
 
     while i < iterations:
         i += 1
-        perceptron(data=data, target_params=target_parameters)
+        perceptron(data=data, result=result, target_params=target_parameters)
         convergence.append(cosine(target_parameters, source_parameters))
-        errors = measure_numeric_error(data=data)
-        err_num_avg.append(np.mean(errors))
-        err_freq = len(list(filter(lambda x: x, measure_classification_error(data=data)))) / len(
-            data
+        err_num.append(np.mean(measure_numeric_error(data=data, control=result)))
+        err_class.append(
+            len(
+                list(
+                    filter(
+                        lambda x: x is True,
+                        measure_classification_error(data=data, control=boolean_result),
+                    )
+                )
+            )
+            / len(data)
         )
-        err_class.append(err_freq)
 
-    print(f"Processed PERCEPTRON for {i} iterations!")
+    print(f"Processed LINEAR REGRESSION for {i} iterations!")
     print(target_parameters)
     print(source_parameters)
     print("\n")
 
-    return convergence, err_num_avg, err_class
+    return convergence, err_num, err_class
 
 
 def measure_numeric_error(
-    data: list[tuple[Credit, float]], err_func=lambda x, y: (x - y) ** 2
-) -> list[float]:
-    err_list = [err_func(g(data_point=data_point), result) for data_point, result in data]
+    data: np.ndarray, control: np.ndarray, err_func=lambda x, y: (x - y) ** 2
+) -> np.ndarray:
+    err_list = np.array(
+        [err_func(g(data_point=data_point), result) for data_point, result in zip(data, control)]
+    )
     return err_list
 
 
 def measure_classification_error(
-    data: list[tuple[Credit, bool]], err_func=lambda x, y: x != y
-) -> list[bool]:
-    err_list = [err_func(g(data_point=data_point) >= 0.0, result) for data_point, result in data]
+    data: np.ndarray, control: np.ndarray, err_func=lambda x, y: x != y
+) -> np.ndarray:
+    err_list = np.array(
+        [
+            err_func(g(data_point=data_point) >= 0.0, result)
+            for data_point, result in zip(data, control)
+        ]
+    )
     return err_list
 
 

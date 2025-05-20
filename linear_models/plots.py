@@ -5,9 +5,9 @@ import numpy as np
 
 
 def scatter_plot(data: list[Credit], h: Callable, file: str, params: Sequence[float], title: str):
-    thresholds = [d.threshold for d in data]
-    wealth_scores = [d.wealth_score for d in data]
-    profile_scores = [d.profile_score for d in data]
+    thresholds = data[:, 0]
+    wealth_scores = data[:, 1]
+    profile_scores = data[:, 2]
     labels = [h(d) >= 0.0 for d in data]
     colors = ["tab:blue" if label else "tab:orange" for label in labels]
     plt.figure(figsize=(6, 6))
