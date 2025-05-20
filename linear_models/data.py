@@ -3,10 +3,11 @@ import numpy as np
 
 TOLERANCE = 10**-4
 DEFAULT_SIZE = 1000
+PARAMS = ["threshold", "wealth_score", "profile_score"]
 
-Credit = namedtuple("Credit", ["threshold", "wealth_score", "profile_score"])
+Data = namedtuple("Data", PARAMS)
 
-dimensionality = len(Credit._fields)
+dimensionality = len(Data._fields)
 seed = 1
 
 source_parameters = np.array([-0.7, 1.0, 1.0])
@@ -30,14 +31,14 @@ def generate_binary_data(
     rng: np.random.Generator,
     dimensionality: int,
     sample_size: int = DEFAULT_SIZE,
-) -> list[tuple[Credit, bool]]:
+) -> list[tuple[Data, bool]]:
     avg = 0.4
     std = 0.1
 
     thresholds = [1.0] * sample_size
     data = list(
         map(
-            lambda x: Credit(*x),
+            lambda x: Data(*x),
             zip(
                 thresholds,
                 *[
@@ -51,18 +52,18 @@ def generate_binary_data(
     return data, list(map(lambda x: f(x) >= 0.0, data))
 
 
-def generate_data(
+def generate_sample_data(
     rng: np.random.Generator,
     dimensionality: int,
     sample_size: int,
-) -> tuple[list[Credit], list[float]]:
+) -> tuple[np.ndarray[float], np.ndarray[float]]:
     avg = 0.4
     std = 0.1
 
     thresholds = [1.0] * sample_size
     data = list(
         map(
-            lambda x: Credit(*x),
+            lambda x: Data(*x),
             zip(
                 thresholds,
                 *[
@@ -73,4 +74,4 @@ def generate_data(
         )
     )
 
-    return data, list(map(f, data))
+    return np.asarray(a=data, dtype=float), np.array(list(map(f, data)))

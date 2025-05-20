@@ -1,10 +1,10 @@
 from typing import Callable, Sequence
 import matplotlib.pyplot as plt
-from linear_models.data import Credit
+from linear_models.data import Data
 import numpy as np
 
 
-def scatter_plot(data: list[Credit], h: Callable, file: str, params: Sequence[float], title: str):
+def scatter_plot(data: list[Data], h: Callable, file: str, params: Sequence[float], title: str):
     thresholds = data[:, 0]
     wealth_scores = data[:, 1]
     profile_scores = data[:, 2]
@@ -70,5 +70,5 @@ def scatter_plot(data: list[Credit], h: Callable, file: str, params: Sequence[fl
     plt.legend(handles=legend_elements)
     plt.tight_layout()
     plt.savefig(file)
-    # plt.show()
-    plt.close()
+    plt.show(block=False)
+    # plt.close()
