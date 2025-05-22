@@ -8,10 +8,10 @@ from linear_models.data import (
     seed,
 )
 
-
 rng: np.random.Generator = np.random.default_rng(seed=seed)
 
 target_parameters = np.array([rng.random() for _ in range(dimensionality)])
+# target_parameters = np.array([-1.0, 1.0, 1.0])
 
 
 def g(data_point: np.ndarray) -> float:
@@ -24,13 +24,20 @@ def linear_regression(data: np.ndarray, result: np.ndarray, target_params: np.nd
     test: np.ndarray = np.matmul(data, target_params)
     assert test.shape == result.shape
 
-    diff = np.abs(result - test)
+    diffs = np.abs(result - test) > TOLERANCE
+    idx = diffs.argmax()
 
-    if diff.max() >= TOLERANCE:
-        idx = diff.argmax()
+    if np.abs(result[idx] - test[idx]) > TOLERANCE:
+        assert not np.isnan(result[idx] - test[idx])
         y = result[idx] - test[idx]
+
+        y = min(y, 1) if y >= 0 else max(y, -1)
+
         values = data[idx]
         target_params += values * y
+        return False
+    else:
+        return True
 
 
 @benchmark
@@ -62,10 +69,10 @@ def train(
         ]
 
     i = 0
-
-    while i < iterations:
+    done = False
+    while i < iterations and not done:
         i += 1
-        linear_regression(data=data, result=result, target_params=target_parameters)
+        done = linear_regression(data=data, result=result, target_params=target_parameters)
         if measure_convergence:
             convergence.append(cosine(target_parameters, source_parameters))
             err_num.append(np.mean(measure_numeric_error(data=data, control=result)))
@@ -82,8 +89,7 @@ def train(
             )
 
     print(f"Processed LINEAR REGRESSION for {i} iterations!")
-    print(target_parameters)
-    print(source_parameters)
+    print("Final parameters: ", target_parameters)
     print("\n")
 
     return convergence, err_num, err_class
