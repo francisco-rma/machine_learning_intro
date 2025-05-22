@@ -22,7 +22,7 @@ def perceptron(data: np.ndarray, result: np.ndarray, target_params: np.ndarray) 
     test = np.array(list(map(lambda x: x >= 0.0, np.matmul(data, target_params))))
     assert test.shape == result.shape
 
-    diff: np.ndarray = result == test
+    diff: np.ndarray = result != test
     assert diff.shape == test.shape
     assert diff.shape == result.shape
 
@@ -31,6 +31,9 @@ def perceptron(data: np.ndarray, result: np.ndarray, target_params: np.ndarray) 
         y = -1 if test[idx] else 1
         values = data[idx]
         target_params += values * y
+        return False
+    else:
+        return True
 
 
 @benchmark
@@ -62,10 +65,10 @@ def train(
         ]
 
     i = 0
-
-    while i < iterations:
+    done = False
+    while i < iterations and not done:
         i += 1
-        perceptron(data=data, result=result, target_params=target_parameters)
+        done = perceptron(data=data, result=result, target_params=target_parameters)
         if measure_convergence:
             convergence.append(cosine(target_parameters, source_parameters))
             err_num.append(np.mean(measure_numeric_error(data=data, control=result)))
@@ -80,8 +83,7 @@ def train(
             err_class.append(class_err_freq)
 
     print(f"Processed PERCEPTRON for {i} iterations!")
-    print(target_parameters)
-    print(source_parameters)
+    print("Final parameters: ", target_parameters)
     print("\n")
 
     return convergence, err_num, err_class
