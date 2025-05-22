@@ -6,8 +6,10 @@ name = "pypi"
 [packages]
 numpy = "*"
 matplotlib = "*"
+requests = "*"
 
 [dev-packages]
+kagglehub = "*"
 
 [requires]
 python_version = "3.13"
