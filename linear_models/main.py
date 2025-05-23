@@ -38,67 +38,12 @@ training_classification_result = np.array(
     list(map(lambda x: 1 if x else -1, training_boolean_result))
 )
 
-linear_regression.train(data=training_data, result=training_classification_result)
+# lr_g, lr_params = linear_regression.train(data=training_data, result=training_classification_result)
+lr_g, lr_params = linear_regression.train(data=training_data, result=training_result)
 
 perceptron_g, perceptron_params = perceptron.train(
     data=training_data, result=training_boolean_result, iterations=ITERN_N
 )
-
-
-# if CONVERGENCE:
-#     x_axis = range(len(perceptron_class_err_convergence))
-#     assert len(x_axis) == len(perceptron_class_err_convergence)
-#     assert len(x_axis) == len(perceptron_cosine_convergence)
-#     assert len(x_axis) == len(perceptron_num_err_convergence)
-#     assert len(x_axis) == len(linear_regression_cosine_convergence)
-#     assert len(x_axis) == len(linear_regression_class_err_convergence)
-#     assert len(x_axis) == len(linear_regression_num_err_convergence)
-
-#     # cosine, classification error and numeric error convergences
-#     plt.figure()
-#     plt.plot(perceptron_cosine_convergence, label="perceptron")
-#     plt.plot(linear_regression_cosine_convergence, label="linear regression")
-#     plt.xlabel("Iteration")
-#     plt.ylabel("Angle cosine")
-#     plt.legend()
-#     plt.tight_layout()
-#     plt.savefig("linear_models_convergence.png")
-#     plt.show(block=False)
-
-#     plt.figure()
-#     plt.scatter(
-#         x=x_axis,
-#         y=perceptron_class_err_convergence,
-#         label="perceptron",
-#         s=10,
-#     )
-#     plt.scatter(
-#         x=x_axis,
-#         y=linear_regression_class_err_convergence,
-#         label="linear regression",
-#         s=10,
-#     )
-#     plt.xlabel("Iteration")
-#     plt.ylabel("Classification error")
-#     plt.legend()
-#     plt.tight_layout()
-#     plt.savefig("perceptron_classification_error")
-#     plt.show(block=False)
-
-#     plt.figure()
-#     plt.scatter(x=x_axis, y=perceptron_num_err_convergence, label="perceptron", s=10)
-#     plt.scatter(
-#         x=x_axis,
-#         y=linear_regression_num_err_convergence,
-#         label="linear regression",
-#         s=10,
-#     )
-#     plt.xlabel("Iteration")
-#     plt.ylabel("Numeric error")
-#     plt.legend()
-#     plt.tight_layout()
-#     plt.savefig("perceptron_numeric_error")
-#     plt.show(block=False)
 
 out_of_sample_data, out_of_sample_result = data.generate_sample_data(
     rng=np.random.default_rng(seed=3), sample_size=data.DEFAULT_SIZE * 10
@@ -116,11 +61,11 @@ perceptron_num_error = perceptron.measure_numeric_error(
 )
 
 linear_regression_class_error = linear_regression.measure_classification_error(
-    data=out_of_sample_data, control=out_of_sample_bool_result
+    data=out_of_sample_data, control=out_of_sample_bool_result, map_func=lr_g
 )
 
 linear_regression_num_error = linear_regression.measure_numeric_error(
-    out_of_sample_data, control=out_of_sample_result
+    out_of_sample_data, control=out_of_sample_result, map_func=lr_g
 )
 
 print(f"perceptron classification error: {np.mean(perceptron_class_error)}")
@@ -154,9 +99,9 @@ plots.scatter_plot(
 plots.scatter_plot(
     title="Linear Regression Data",
     data=out_of_sample_data,
-    h=linear_regression.g,
+    h=lr_g,
     file="linear_regression_func_scatter.png",
-    params=linear_regression.target_parameters,
+    params=lr_params,
 )
 
 plt.show()
