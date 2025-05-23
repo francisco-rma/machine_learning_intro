@@ -4,7 +4,9 @@ from linear_models.data import Data
 import numpy as np
 
 
-def scatter_plot(data: list[Data], h: Callable, file: str, params: Sequence[float], title: str):
+def scatter_plot(
+    data: list[Data], h: Callable, file: str, params: Sequence[float], title: str, show=False
+):
     thresholds = data[:, 0]
     a_scores = data[:, 1]
     b_scores = data[:, 2]
@@ -71,11 +73,12 @@ def scatter_plot(data: list[Data], h: Callable, file: str, params: Sequence[floa
     plt.legend(handles=legend_elements)
     plt.tight_layout()
     plt.savefig(file)
-    # plt.show(block=False)
+    if show:
+        plt.show(block=False)
     # plt.close()
 
 
-def result_plot(data: list[Data], result: list[float], file: str, title: str):
+def result_plot(data: list[Data], result: list[float], file: str, title: str, show=False):
     a_scores = data[:, 1]
     b_scores = data[:, 2]
     labels = [res >= 0.0 for res in result]
@@ -114,5 +117,6 @@ def result_plot(data: list[Data], result: list[float], file: str, title: str):
     plt.legend(handles=legend_elements)
     plt.tight_layout()
     plt.savefig(file)
-    # plt.show(block=False)
-    # plt.close()
+
+    if show:
+        plt.show(block=False)
