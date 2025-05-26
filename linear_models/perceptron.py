@@ -9,6 +9,7 @@ from linear_models.data import (
 
 
 def perceptron(data: np.ndarray, result: np.ndarray, target_parameters: np.ndarray) -> bool:
+    assert data.shape[0] == result.shape[0]
     assert data.shape[1] == target_parameters.shape[0]
 
     test = np.array(list(map(lambda x: x >= 0.0, np.matmul(data, target_parameters))))
@@ -32,8 +33,10 @@ def numeric_perceptron(data: np.ndarray, result: np.ndarray, target_parameters: 
     test: np.ndarray = np.matmul(data, target_parameters)
     assert test.shape == result.shape
 
-    diffs = np.abs(result - test) > TOLERANCE
-    idx = diffs.argmax()
+    diff = np.abs(result - test) > TOLERANCE
+    assert diff.shape == test.shape == result.shape
+
+    idx = diff.argmax()
 
     if np.abs(result[idx] - test[idx]) > TOLERANCE:
         assert not np.isnan(result[idx] - test[idx])
